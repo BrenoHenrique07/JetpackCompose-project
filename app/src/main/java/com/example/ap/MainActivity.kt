@@ -3,8 +3,11 @@ package com.example.ap
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Surface
@@ -37,14 +40,21 @@ class MainActivity : ComponentActivity() {
 fun Greeting(name: String) {
 
     Column(
-
+        modifier = Modifier.fillMaxWidth()
     ) {
-        var text by remember { mutableStateOf("") }
+        var model by remember { mutableStateOf("") }
+        var price by remember { mutableStateOf("") }
 
         OutlinedTextField(
-            value = text,
-            onValueChange = { text = it },
-            label = { Text("Label") },
+            value = model,
+            onValueChange = { model = it },
+            label = { Text("Model") },
+            modifier = Modifier.align(Alignment.CenterHorizontally)
+        )
+        OutlinedTextField(
+            value = price,
+            onValueChange = { price = it },
+            label = { Text("Price") },
             modifier = Modifier.align(Alignment.CenterHorizontally)
         )
     }
