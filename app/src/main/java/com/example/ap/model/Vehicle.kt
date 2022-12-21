@@ -1,8 +1,10 @@
 package com.example.ap.model
 
-class Vehicle (
+data class Vehicle (
+    var id: Long = 0,
     val model: String,
     val price: Float,
     val type: VehicleType,
-    val sold: Boolean
-)
+    val sold: Boolean = false,
+) {
+}
