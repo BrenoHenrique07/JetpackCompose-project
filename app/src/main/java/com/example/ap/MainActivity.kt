@@ -11,6 +11,7 @@ import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.modifier.modifierLocalOf
 import androidx.compose.ui.semantics.Role.Companion.Button
 import androidx.compose.ui.tooling.preview.Preview
@@ -41,11 +42,12 @@ class MainActivity : ComponentActivity() {
 fun Greeting(name: String) {
 
     Column(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
     ) {
         var model by remember { mutableStateOf("") }
         var type by remember { mutableStateOf("") }
         var price by remember { mutableStateOf("") }
+        var expanded by remember { mutableStateOf(false) } // initial value
 
         OutlinedTextField(
             value = model,
@@ -53,12 +55,36 @@ fun Greeting(name: String) {
             label = { Text("Model") },
             modifier = Modifier.align(Alignment.CenterHorizontally)
         )
-        OutlinedTextField(
-            value = type,
-            onValueChange = { type = it },
-            label = {Text(text = "choose a type")},
+
+        Box (
             modifier = Modifier.align(Alignment.CenterHorizontally)
-        )
+        ){
+            OutlinedTextField(
+                value = type,
+                onValueChange = { type = it },
+                label = {Text(text = "choose a type")},
+            )
+            DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+                VehicleType.values().forEach {
+                    DropdownMenuItem(onClick = {
+                        expanded = false
+                        VehicleType.values()
+                    }) {
+                        Text(text = VehicleType.values().toString())
+                    }
+
+                }
+            }
+            Spacer(modifier = Modifier
+                .matchParentSize()
+                .background(Color.Transparent)
+                .padding(10.dp)
+                .clickable(
+                    onClick = {expanded = !expanded}
+                )
+            )
+        }
+
         OutlinedTextField(
             value = price,
             onValueChange = { price = it },
@@ -84,22 +110,4 @@ fun DefaultPreview() {
     APTheme {
         Greeting("Android")
     }
-}
-
-@Composable
-fun CountryPickerView(
-    selectedCountry: VehicleType,
-    onSelection: (VehicleType) -> Unit,
-    countries: List<VehicleType>
-) {
-    var showDialog by remember { mutableStateOf(false) }
-    Text(
-        modifier = Modifier
-            .clickable {
-                showDialog = true
-            }
-            .padding(start = 20.dp, end = 5.dp),
-        text = "${(selectedCountry.type)}"
-    )
-
 }
