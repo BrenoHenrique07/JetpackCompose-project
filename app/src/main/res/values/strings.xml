@@ -1,3 +1,4 @@
 <resources>
-    <string name="app_name">AP</string>
+    <string name="app_name">Concessionaria Pedro Dionísio Matias</string>
+    <string name="description_text">Price: %s\nType: %s\nStatus: %s</string>
 </resources>
