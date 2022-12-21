@@ -61,16 +61,16 @@ fun Greeting(name: String) {
         ){
             OutlinedTextField(
                 value = type,
-                onValueChange = { type = it },
+                onValueChange = { },
                 label = {Text(text = "choose a type")},
             )
             DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
                 VehicleType.values().forEach {
                     DropdownMenuItem(onClick = {
                         expanded = false
-                        VehicleType.values()
+                        type = it.toString()
                     }) {
-                        Text(text = VehicleType.values().toString())
+                        Text(text = it.name)
                     }
 
                 }
