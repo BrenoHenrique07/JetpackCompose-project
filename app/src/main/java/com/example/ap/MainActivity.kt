@@ -17,6 +17,8 @@ import androidx.compose.ui.semantics.Role.Companion.Button
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.leanback.widget.Row
+import com.example.ap.data.DaoVehicleSingleton
+import com.example.ap.model.Vehicle
 import com.example.ap.model.VehicleType
 import com.example.ap.ui.theme.APTheme
 import java.text.Normalizer.Form
@@ -62,7 +64,7 @@ fun Greeting(name: String) {
             OutlinedTextField(
                 value = type,
                 onValueChange = { },
-                label = {Text(text = "choose a type")},
+                label = {Text(text = "Choose a type...")},
             )
             DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
                 VehicleType.values().forEach {
@@ -87,12 +89,18 @@ fun Greeting(name: String) {
 
         OutlinedTextField(
             value = price,
-            onValueChange = { price = it },
-            label = { Text("Price") },
+            onValueChange = { price = it},
+            label = {Text(text = "Price") },
             modifier = Modifier.align(Alignment.CenterHorizontally)
         )
         Button(onClick = {
-            //your onclick code here
+            if(model != "" && price != "" && type != "") {
+                var v = Vehicle(model, price.toFloat(), VehicleType.valueOf(type))
+                DaoVehicleSingleton.add(v)
+                model = ""
+                type = ""
+                price = ""
+            }
         },elevation =  ButtonDefaults.elevation(
             defaultElevation = 10.dp,
             pressedElevation = 15.dp,
