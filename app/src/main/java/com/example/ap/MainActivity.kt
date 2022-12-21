@@ -1,7 +1,8 @@
 package com.example.ap
 
+import android.content.Context
 import android.os.Bundle
-import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.*
@@ -10,37 +11,26 @@ import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.HorizontalAlignmentLine
-import androidx.compose.ui.modifier.modifierLocalOf
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.Role.Companion.Button
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.leanback.widget.Row
-import androidx.leanback.widget.Visibility
 import com.example.ap.data.DaoVehicleSingleton
 import com.example.ap.model.Vehicle
 import com.example.ap.model.VehicleType
 import com.example.ap.ui.theme.APTheme
-import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
-import java.text.Normalizer.Form
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -52,7 +42,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colors.background
                 ) {
-                    Greeting("Android")
+                    App()
                 }
             }
         }
@@ -61,7 +51,11 @@ class MainActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun Greeting(name: String) {
+fun App() {
+    fun Toast(context: Context, message: String){
+        Toast.makeText(context, message, Toast.LENGTH_LONG).show()
+    }
+    val context = LocalContext.current
     Column(
         modifier = Modifier.fillMaxWidth(),
     ) {
@@ -75,8 +69,9 @@ fun Greeting(name: String) {
             value = model,
             onValueChange = { model = it },
             label = { Text("Model") },
-            modifier = Modifier.align(Alignment.CenterHorizontally).
-            fillMaxWidth()
+            modifier = Modifier
+                .align(Alignment.CenterHorizontally)
+                .fillMaxWidth()
                 .padding(horizontal = 16.dp)
                 .padding(top = 24.dp)
         )
@@ -89,8 +84,8 @@ fun Greeting(name: String) {
                 value = type,
                 onValueChange = {},
                 label = {Text(text = "Choose a type...")},
-                    modifier = Modifier.
-                    fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
                         .padding(horizontal = 16.dp)
                         ,
                 trailingIcon = {
@@ -120,33 +115,45 @@ fun Greeting(name: String) {
                 )
             )
         }
-
         OutlinedTextField(
             value = price,
             onValueChange = { price = it},
             label = {Text(text = "Price") },
-            modifier = Modifier.align(Alignment.CenterHorizontally).
-            fillMaxWidth()
+            modifier = Modifier
+                .align(Alignment.CenterHorizontally)
+                .fillMaxWidth()
                 .padding(horizontal = 16.dp),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
         )
         Button(onClick = {
-            if(model != "" && price != "" && type != "") {
-                var v = Vehicle(model,price.toFloat(),VehicleType.valueOf(type))
+            fun isPriceValid(): Boolean {
+                return price.toFloatOrNull() != null
+            }
+            if(model != "" && price != "" && type != "" && isPriceValid()) {
+                val p = "%.2f".format(price.toFloat())
+                val v = Vehicle(model,p.toFloat(),VehicleType.valueOf(type))
                 DaoVehicleSingleton.add(v)
                 model = ""
                 price = ""
                 type = ""
             }
+            else if (price.toFloatOrNull() == null && price !=  ""){
+                Toast(context, "Price is invalid, try again !!!")
+            }
+            else {
+                Toast(context, "Invalid!! Fill all the fields!!!")
+            }
         },elevation =  ButtonDefaults.elevation(
             defaultElevation = 10.dp,
             pressedElevation = 15.dp,
             disabledElevation = 0.dp
-        ),  modifier = Modifier.align(Alignment.CenterHorizontally).padding(vertical = 8.dp)
+        ),  modifier = Modifier
+            .align(Alignment.CenterHorizontally)
+            .padding(vertical = 8.dp)
         ) {
             Text(text = "Submit")
         }
-        VehicleList(vehicles = DaoVehicleSingleton.getVehicles()) {}
+        VehicleList(vehicles = DaoVehicleSingleton.getVehicles())
         AnimatedVisibility(
             visible = DaoVehicleSingleton.getVehicles().isEmpty(),
             enter = fadeIn(initialAlpha = 0f) + expandVertically(),
@@ -166,7 +173,7 @@ fun Greeting(name: String) {
 }
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun VehicleItemView(vehicle: Vehicle, onClick: () -> Unit) {
+fun VehicleItemView(vehicle: Vehicle) {
     var expandDetails by remember { mutableStateOf(false) }
     Card(
         modifier =
@@ -175,12 +182,12 @@ fun VehicleItemView(vehicle: Vehicle, onClick: () -> Unit) {
             .padding(8.dp)
             .combinedClickable(
                 onClick = {
-                expandDetails = !expandDetails
-            },
-            onLongClick = {
-                vehicle.sold = true
-                expandDetails = !expandDetails
-            }
+                    expandDetails = !expandDetails
+                },
+                onLongClick = {
+                    vehicle.sold = !vehicle.sold
+                    expandDetails = !expandDetails
+                }
             ),
         elevation = 2.dp
     ) {
@@ -194,7 +201,7 @@ fun VehicleItemView(vehicle: Vehicle, onClick: () -> Unit) {
             ) {
                 Box(
                     modifier = Modifier
-                        .background(if(vehicle.sold) Color.Red else Color.Green)
+                        .background(if (vehicle.sold) Color.Red else Color.Green)
                         .size(8.dp, 60.dp)
                 )
                 Text(
@@ -211,14 +218,17 @@ fun VehicleItemView(vehicle: Vehicle, onClick: () -> Unit) {
                     maxLines = 1
                 )
                 Row (
-                    modifier = Modifier.clipToBounds().align(Alignment.CenterVertically)
+                    modifier = Modifier
+                        .clipToBounds()
+                        .align(Alignment.CenterVertically)
                         .weight(20.toFloat())
                         ){
                     AnimatedVisibility(
                         visible = vehicle.sold,
                         enter = fadeIn(initialAlpha = 0f) + expandVertically(),
                         exit = fadeOut(animationSpec = tween(durationMillis = 250)) + shrinkVertically(),
-                        modifier = Modifier.wrapContentWidth()
+                        modifier = Modifier
+                            .wrapContentWidth()
                             .clipToBounds(),
                     ) {
                         Text(
@@ -255,12 +265,10 @@ fun VehicleItemView(vehicle: Vehicle, onClick: () -> Unit) {
 }
 
 @Composable
-fun VehicleList(vehicles: List<Vehicle>, onClick: (vehicle: Vehicle) -> Unit) {
+fun VehicleList(vehicles: List<Vehicle>) {
     LazyColumn {
         items(vehicles) { vehicle ->
-            VehicleItemView(vehicle) {
-                onClick(vehicle)
-            }
+            VehicleItemView(vehicle)
         }
     }
 }
@@ -269,6 +277,6 @@ fun VehicleList(vehicles: List<Vehicle>, onClick: (vehicle: Vehicle) -> Unit) {
 @Composable
 fun DefaultPreview() {
     APTheme {
-        Greeting("Android")
+        App()
     }
 }
