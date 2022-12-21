@@ -1,21 +1,30 @@
 package com.example.ap
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.modifier.modifierLocalOf
 import androidx.compose.ui.semantics.Role.Companion.Button
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.leanback.widget.Row
 import com.example.ap.data.DaoVehicleSingleton
 import com.example.ap.model.Vehicle
@@ -49,7 +58,7 @@ fun Greeting(name: String) {
         var model by remember { mutableStateOf("") }
         var type by remember { mutableStateOf("") }
         var price by remember { mutableStateOf("") }
-        var expanded by remember { mutableStateOf(false) } // initial value
+        var expanded by remember { mutableStateOf(false) }
 
         OutlinedTextField(
             value = model,
@@ -82,7 +91,7 @@ fun Greeting(name: String) {
                 .background(Color.Transparent)
                 .padding(10.dp)
                 .clickable(
-                    onClick = {expanded = !expanded}
+                    onClick = { expanded = !expanded }
                 )
             )
         }
@@ -91,15 +100,17 @@ fun Greeting(name: String) {
             value = price,
             onValueChange = { price = it},
             label = {Text(text = "Price") },
-            modifier = Modifier.align(Alignment.CenterHorizontally)
+            modifier = Modifier.align(Alignment.CenterHorizontally),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
         )
         Button(onClick = {
             if(model != "" && price != "" && type != "") {
-                var v = Vehicle(model, price.toFloat(), VehicleType.valueOf(type))
+                var v = Vehicle(model,price.toFloat(),VehicleType.valueOf(type))
                 DaoVehicleSingleton.add(v)
+                Log.i("teste", v.toString())
                 model = ""
-                type = ""
                 price = ""
+                type = ""
             }
         },elevation =  ButtonDefaults.elevation(
             defaultElevation = 10.dp,
@@ -108,6 +119,47 @@ fun Greeting(name: String) {
         ),  modifier = Modifier.align(Alignment.CenterHorizontally)
         ) {
             Text(text = "Submit")
+        }
+        VehicleList(vehicles = DaoVehicleSingleton.getVehicles()) {}
+    }
+}
+@Composable
+fun VehicleItemView(vehicle: Vehicle, onClick: () -> Unit) {
+    Card(
+        modifier =
+        Modifier
+            .padding(8.dp)
+            .fillMaxWidth()
+            .clickable {
+                onClick()
+            },
+        elevation = 2.dp
+    ) {
+        Row(modifier =
+        Modifier
+            .padding(8.dp)
+        ) {
+            Text(
+                text = vehicle.model,
+                fontSize = 20.sp,
+                modifier =
+                Modifier
+                    .align(Alignment.CenterVertically)
+                    .padding(horizontal = 8.dp),
+                overflow = TextOverflow.Ellipsis,
+                maxLines = 1
+            )
+        }
+    }
+}
+
+@Composable
+fun VehicleList(vehicles: List<Vehicle>, onClick: (vehicle: Vehicle) -> Unit) {
+    LazyColumn {
+        items(vehicles) { vehicle ->
+            VehicleItemView(vehicle) {
+                onClick(vehicle)
+            }
         }
     }
 }
