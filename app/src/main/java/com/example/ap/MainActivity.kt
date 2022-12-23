@@ -100,6 +100,7 @@ fun App() {
                     DropdownMenuItem(onClick = {
                         expanded = false
                         type = it.name
+
                     }) {
                         Text(text = it.type)
                     }
