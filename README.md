@@ -1,3 +1,3 @@
 Authors:
-    Breno Henrique Santos Silva
-    Caio Freitas Ferreira de Lima
+    Breno Henrique Santos Silva e 
+    Caio Freitas Ferreira de Lima 
